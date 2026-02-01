@@ -23,16 +23,16 @@ def health_check():
     return {"status": "ok", "service": "mongotel_scraper"}
 
 @app.get("/call_history")
-def run_scraper():
+def run_scraper(limit: int = 50):
     # Attempt to acquire lock without blocking
     if not scraper_lock.acquire(blocking=False):
         print("⚠️ Request rejected: Server busy with another scrape task")
         return {"status": "error", "message": "Server is busy with another scraping task. Please try again in 30 seconds."}
     
     try:
-        print("🔒 Lock acquired, starting Call History Scraper...")
+        print(f"🔒 Lock acquired, starting Call History Scraper (Limit: {limit})...")
         bot = CallHistory()
-        data = bot.scrape()
+        data = bot.scrape(limit=limit)
         parsed_data = json.loads(data)
         count = len(parsed_data.get("results", []))
         print(f"✅ Scraper finished successfully. Returning {count} records.")
@@ -46,15 +46,15 @@ def run_scraper():
         print("🔓 Lock released")
 
 @app.get("/voicemails")
-def run_voicemail_scraper():
+def run_voicemail_scraper(limit: int = 50):
     if not scraper_lock.acquire(blocking=False):
         print("⚠️ Request rejected: Server busy with another scrape task")
         return {"status": "error", "message": "Server is busy with another scraping task. Please try again in 30 seconds."}
 
     try:
-        print("🔒 Lock acquired, starting Voicemail Scraper...")
+        print(f"🔒 Lock acquired, starting Voicemail Scraper (Limit: {limit})...")
         bot = VoicemailScraper()
-        json_data = bot.scrape()
+        json_data = bot.scrape(limit=limit)
         
         data = json.loads(json_data)
         count = data.get("count", 0)
@@ -69,15 +69,15 @@ def run_voicemail_scraper():
         print("🔓 Lock released")
 
 @app.get("/messages")
-def run_messages_scraper():
+def run_messages_scraper(limit: int = 50):
     if not scraper_lock.acquire(blocking=False):
         print("⚠️ Request rejected: Server busy with another scrape task")
         return {"status": "error", "message": "Server is busy with another scraping task. Please try again in 30 seconds."}
 
     try:
-        print("🔒 Lock acquired, starting Chat & SMS Scraper...")
+        print(f"🔒 Lock acquired, starting Chat & SMS Scraper (Limit: {limit})...")
         bot = ChatSmsScraper()
-        json_data = bot.scrape()
+        json_data = bot.scrape(limit=limit)
         
         data = json.loads(json_data)
         count = data.get("count", 0)

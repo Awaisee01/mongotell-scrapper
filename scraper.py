@@ -18,7 +18,7 @@ class CallHistory(BotasaurusBrowser):
     PASSWORD = settings.MONGOTEL_PASSWORD
     BASE_URL = "https://portal.mongotel.com/portal/login/"
 
-    def scrape(self):
+    def scrape(self, limit=50):
         try:
             if not self.USERNAME or not self.PASSWORD:
                 raise ValueError("Missing credentials")
@@ -129,6 +129,11 @@ class CallHistory(BotasaurusBrowser):
                         logger.error(f"Row skipped due to error: {e}")
                 
                 all_results.extend(results)
+                
+                if len(all_results) >= limit:
+                    logger.info(f"Limit of {limit} reached. Stopping.")
+                    all_results = all_results[:limit]
+                    break
 
                 #  Check if "Next" is disabled
                 next_button = self.find_element("li.next", multiple=False)
@@ -235,6 +240,9 @@ class VoicemailScraper(BotasaurusBrowser):
                         }
                     })
 
+                    if len(results) >= limit:
+                        break
+
                 except Exception as e:
                     logger.error(f"Voicemail row skipped due to error: {e}")
 
@@ -303,6 +311,9 @@ class ChatSmsScraper(BotasaurusBrowser):
                             "message": message,
                             "time": time_val
                         })
+                    
+                    if len(results) >= limit:
+                        break
 
                 except Exception as e:
                     logger.error(f"Message row skipped due to error: {e}")
