@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+botasaurus
+cloudinary
+requests
+pydantic
+pydantic-settings

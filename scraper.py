@@ -1,21 +1,21 @@
 import cloudinary
 
-from .base import BotasaurusBrowser
+from base import BotasaurusBrowser
 from datetime import datetime
 import json
-from .config import logger
-from .utils import download_with_browser_session, upload_to_cloudinary
+from config import logger, settings
+from utils import download_with_browser_session, upload_to_cloudinary
 
 cloudinary.config(
-    cloud_name="dvaxklnue",
-    api_key="915578838771632",
-    api_secret="HvqKuSZLNy5OS_LgYn7ka4YTIsg",
+    cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+    api_key=settings.CLOUDINARY_API_KEY,
+    api_secret=settings.CLOUDINARY_API_SECRET,
     secure=True
 )
 
 class CallHistory(BotasaurusBrowser):
-    USERNAME = "100@wfw"
-    PASSWORD = "Wolf@5136"
+    USERNAME = settings.MONGOTEL_USERNAME
+    PASSWORD = settings.MONGOTEL_PASSWORD
     BASE_URL = "https://portal.mongotel.com/portal/login/"
 
     def scrape(self):

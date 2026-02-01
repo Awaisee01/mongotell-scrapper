@@ -2,8 +2,8 @@ import threading
 import time
 import uuid
 from botasaurus.browser import Driver, Wait
-from .config import logger
-from .schemas import BrowserConfig, Element
+from config import logger, settings
+from schemas import BrowserConfig, Element
 
 
 class ElementCache:
@@ -37,7 +37,7 @@ class BotasaurusBrowser:
             self.config = config
 
             self.driver = Driver(
-                headless=False,
+                headless=not settings.LOCAL_DEV,
             )
 
             self.is_initialized = True
