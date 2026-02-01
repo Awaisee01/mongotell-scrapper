@@ -167,7 +167,7 @@ class VoicemailScraper(BotasaurusBrowser):
     BASE_URL = "https://portal.mongotel.com/portal/login/"
     VOICEMAILS_URL = "https://portal.mongotel.com/portal/voicemails"
 
-    def scrape(self):
+    def scrape(self, limit=50):
         try:
             self.driver.get(self.BASE_URL)
             
@@ -264,7 +264,7 @@ class ChatSmsScraper(BotasaurusBrowser):
     BASE_URL = "https://portal.mongotel.com/portal/login/"
     MESSAGES_URL = "https://portal.mongotel.com/portal/messages"
 
-    def scrape(self):
+    def scrape(self, limit=50):
         try:
             self.driver.get(self.BASE_URL)
             
