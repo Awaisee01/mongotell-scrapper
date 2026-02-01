@@ -246,7 +246,7 @@ class VoicemailScraper(BotasaurusBrowser):
                 "results": results
             }, indent=4, ensure_ascii=False)
         finally:
-             if hasattr(self, 'driver'):
+            if hasattr(self, 'driver'):
                 self.driver.close()
 
 
