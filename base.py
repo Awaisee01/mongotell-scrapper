@@ -38,6 +38,7 @@ class BotasaurusBrowser:
 
             self.driver = Driver(
                 headless=not settings.LOCAL_DEV,
+                arguments=["--disable-dev-shm-usage", "--no-sandbox"] if not settings.LOCAL_DEV else []
             )
 
             self.is_initialized = True
