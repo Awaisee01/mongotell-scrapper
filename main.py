@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def health_check():
     return {"status": "ok", "service": "mongotel_scraper"}
 
@@ -28,8 +28,16 @@ def stream_generator(bot_class, limit):
     """
     Generator wrapper that handles locking and conversion to NDJSON.
     """
-    # Attempt to acquire lock
-    if not scraper_lock.acquire(blocking=False):
+    # Attempt to acquire lock with retries
+    acquired = False
+    for i in range(5):
+        if scraper_lock.acquire(blocking=False):
+            acquired = True
+            break
+        print(f"🔒 Server busy. Waiting for lock... (Attempt {i+1}/5)")
+        time.sleep(1)
+
+    if not acquired:
         yield json.dumps({"status": "error", "message": "Server is busy. Please try again later."}) + "\n"
         return
 
