@@ -38,6 +38,18 @@ Render is a great choice because it allows you to deploy **Docker** containers d
 5.  **Deploy**:
     -   Select the **Free** instance type.
     -   Click **"Create Web Service"**.
+    -   **CRITICAL SETTING**: In the "Build & Deploy" section, ensure the **"Docker Command"** field is **EMPTY**. Do not put any start command there; let it use the default from the Dockerfile.
+
+## Troubleshooting & Best Practices
+
+### Free Tier Limitations
+-   **Spin Down**: Free instances sleep after inactivity. The first request will take ~50s to wake it up. This is normal.
+-   **Memory**: Free instances have 512MB RAM. Our Dockerfile is optimized (`--workers 1`) to run within this limit. Do not increase workers.
+
+### Health Checks
+-   Render automatically checks `/healthz` or `/` to see if the app is up.
+-   We have configured the app to support these checks.
+-   If you see "Deploy failed", checking the logs usually reveals memory issues (OOM) or configuration mismatches.
 
 ## Using Your Live API
 

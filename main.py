@@ -24,6 +24,10 @@ app.add_middleware(
 def health_check():
     return {"status": "ok", "service": "mongotel_scraper"}
 
+@app.api_route("/healthz", methods=["GET", "HEAD"])
+def health_check_z():
+    return {"status": "ok", "service": "mongotel_scraper"}
+
 def stream_generator(bot_class, limit):
     """
     Generator wrapper that handles locking and conversion to NDJSON.
