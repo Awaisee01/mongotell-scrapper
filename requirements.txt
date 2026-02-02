@@ -5,3 +5,4 @@ cloudinary
 requests
 pydantic
 pydantic-settings
+selenium

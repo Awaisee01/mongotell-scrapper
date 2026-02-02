@@ -14,6 +14,7 @@
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.18);
         }
+
         .tab-active {
             background: rgba(37, 99, 235, 0.1);
             color: #2563eb;
@@ -27,22 +28,23 @@
     <div class="container mx-auto px-4 py-8">
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div>
-                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                <h1
+                    class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                     Mongotel Dashboard
                 </h1>
                 <p class="text-slate-500 mt-1">Live data from Render Deployment</p>
             </div>
-            
+
             <div class="flex gap-2 p-1 bg-white rounded-xl shadow-sm">
-                <button onclick="switchTab('call_history')" id="tab-call_history" 
+                <button onclick="switchTab('call_history')" id="tab-call_history"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all tab-active flex items-center gap-2">
                     <i data-lucide="phone"></i> Call History
                 </button>
-                <button onclick="switchTab('voicemails')" id="tab-voicemails" 
+                <button onclick="switchTab('voicemails')" id="tab-voicemails"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 hover:bg-slate-50 flex items-center gap-2">
                     <i data-lucide="voicemail"></i> Voicemails
                 </button>
-                <button onclick="switchTab('messages')" id="tab-messages" 
+                <button onclick="switchTab('messages')" id="tab-messages"
                     class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-500 hover:bg-slate-50 flex items-center gap-2">
                     <i data-lucide="message-square"></i> Messages
                 </button>
@@ -59,11 +61,11 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="glass rounded-2xl p-6 shadow-sm">
                 <div class="text-sm font-medium text-slate-500 mb-2">Total Records</div>
-                <div class="text-3xl font-bold text-slate-800" id="totalCount">-</div>
+                <div class="text-3xl font-bold text-slate-800" id="totalCount">0</div>
             </div>
             <div class="glass rounded-2xl p-6 shadow-sm">
-                <div class="text-sm font-medium text-slate-500 mb-2">Last Updated</div>
-                <div class="text-3xl font-bold text-slate-800" id="lastUpdated">-</div>
+                <div class="text-sm font-medium text-slate-500 mb-2">Status</div>
+                <div class="text-xl font-bold text-slate-800" id="streamStatus">Idle</div>
             </div>
             <div class="glass rounded-2xl p-6 shadow-sm">
                 <div class="text-sm font-medium text-slate-500 mb-2">API Status</div>
@@ -83,10 +85,10 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100" id="tableBody">
                         <tr>
-                            <td colspan="100%" class="px-6 py-12 text-center text-slate-400">
+                            <td colspan="102%" class="px-6 py-12 text-center text-slate-400">
                                 <div class="flex flex-col items-center justify-center gap-2">
                                     <i data-lucide="inbox" class="w-8 h-8 opacity-50"></i>
-                                    <p>Select a tab and click "Load Data" to fetch.</p>
+                                    <p>Select a tab and click "Load Data" to stream.</p>
                                 </div>
                             </td>
                         </tr>
@@ -97,19 +99,24 @@
     </div>
 
     <!-- Error Modal -->
-    <div id="errorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl scale-95 transition-transform duration-200">
+    <div id="errorModal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div
+            class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl scale-95 transition-transform duration-200">
             <h3 class="text-lg font-bold text-red-600 mb-2">Error</h3>
             <p class="text-slate-600 mb-6" id="errorMessage">Failed to fetch data.</p>
-            <button onclick="closeError()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-2.5 rounded-xl transition-colors">
+            <button onclick="closeError()"
+                class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-2.5 rounded-xl transition-colors">
                 Dismiss
             </button>
         </div>
     </div>
 
     <script>
-        const API_BASE = "https://mongotell-scrapper.onrender.com";
+        const API_BASE = "http://127.0.0.1:8000";
+      
         let currentTab = 'call_history';
+        let recordsCount = 0;
 
         // Headers Configuration
         const HEADERS = {
@@ -122,7 +129,10 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            
+            recordsCount = 0;
+            document.getElementById('totalCount').innerText = '0';
+            document.getElementById('streamStatus').innerText = 'Idle';
+
             // Update UI
             document.querySelectorAll('[id^="tab-"]').forEach(el => {
                 el.classList.remove('tab-active', 'text-blue-600');
@@ -139,7 +149,7 @@
                     <td colspan="100%" class="px-6 py-12 text-center text-slate-400">
                         <div class="flex flex-col items-center justify-center gap-2">
                             <i data-lucide="arrow-down-circle" class="w-8 h-8 opacity-50"></i>
-                            <p>Ready to load ${tab.replace('_', ' ')}</p>
+                            <p>Ready to stream ${tab.replace('_', ' ')}</p>
                         </div>
                     </td>
                 </tr>
@@ -165,42 +175,81 @@
             const btn = document.getElementById('refreshBtn');
             const btnText = document.getElementById('btnText');
             const icon = btn.querySelector('svg') || btn.querySelector('i');
-            
+            const tbody = document.getElementById('tableBody');
+
             btn.disabled = true;
-            btnText.innerText = 'Scraping...';
-            if(icon) icon.classList.add('animate-spin');
+            btnText.innerText = 'Streaming...';
+            if (icon) icon.classList.add('animate-spin');
+
+            document.getElementById('streamStatus').innerText = 'Starting...';
+            // Clear table initially
+            tbody.innerHTML = '';
+            recordsCount = 0;
+            document.getElementById('totalCount').innerText = '0';
 
             try {
-                const response = await fetch(`${API_BASE}/${currentTab}`);
-                const data = await response.json();
+                const response = await fetch(`${API_BASE}/${currentTab}?limit=50`);
+                if (!response.ok) throw new Error('Network response was not ok');
 
-                if (data.results) {
-                    updateStats(data);
-                    renderData(data.results);
-                } else {
-                    throw new Error(data.message || 'Invalid data received');
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                document.getElementById('streamStatus').innerText = 'Receiving Data...';
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        try {
+                            const data = JSON.parse(line);
+                            handleStreamData(data);
+                        } catch (e) {
+                            console.warn("Error parsing NDJSON line:", e);
+                        }
+                    }
                 }
+
+                document.getElementById('streamStatus').innerText = 'Completed';
+
             } catch (error) {
                 console.error(error);
                 showError(error.message);
+                document.getElementById('streamStatus').innerText = 'Error';
             } finally {
                 btn.disabled = false;
                 btnText.innerText = 'Load Data';
-                if(icon) icon.classList.remove('animate-spin');
+                if (icon) icon.classList.remove('animate-spin');
+                lucide.createIcons();
             }
         }
 
-        function renderData(results) {
+        function handleStreamData(data) {
             const tbody = document.getElementById('tableBody');
-            
-            if (!results.length) {
-                tbody.innerHTML = `<tr><td colspan="100%" class="text-center py-8 text-slate-500">No records found.</td></tr>`;
+
+            if (data.status === 'error') {
+                showError(data.message);
                 return;
             }
 
-            if (currentTab === 'call_history') {
-                tbody.innerHTML = results.map(row => `
-                    <tr class="hover:bg-slate-50/50">
+            if (data.type === 'meta') {
+                console.log("Stream Meta:", data);
+                return;
+            }
+
+            if (data.type === 'data') {
+                const row = data.record;
+                recordsCount++;
+                document.getElementById('totalCount').innerText = recordsCount;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/50 animate-in fade-in slide-in-from-bottom-2 duration-300";
+
+                if (currentTab === 'call_history') {
+                    tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${row.date || '-'}</td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
@@ -213,28 +262,25 @@
                         <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-medium bg-slate-100">${row.release_reason}</span></td>
                         <td class="px-6 py-4 text-sm font-mono text-xs">${row.qos.inbound}/${row.qos.outbound}</td>
                         <td class="px-6 py-4 text-right">${getAudioAction(row.audio)}</td>
-                    </tr>
-                `).join('');
-            } else if (currentTab === 'voicemails') {
-                tbody.innerHTML = results.map(row => `
-                    <tr class="hover:bg-slate-50/50">
+                    `;
+                } else if (currentTab === 'voicemails') {
+                    tr.innerHTML = `
                         <td class="px-6 py-4 text-sm text-slate-600">${row.date}</td>
                         <td class="px-6 py-4 text-sm font-mono">${row.number}</td>
                         <td class="px-6 py-4 text-sm font-medium">${row.name}</td>
                         <td class="px-6 py-4 text-sm">${row.duration}</td>
                         <td class="px-6 py-4 text-right">${getAudioAction(row.audio)}</td>
-                    </tr>
-                `).join('');
-            } else if (currentTab === 'messages') {
-                tbody.innerHTML = results.map(row => `
-                    <tr class="hover:bg-slate-50/50">
+                    `;
+                } else if (currentTab === 'messages') {
+                    tr.innerHTML = `
                         <td class="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">${row.time}</td>
                         <td class="px-6 py-4 text-sm font-mono text-blue-600">${row.number}</td>
                         <td class="px-6 py-4 text-sm text-slate-800">${row.message}</td>
-                    </tr>
-                `).join('');
+                    `;
+                }
+
+                tbody.appendChild(tr);
             }
-            lucide.createIcons();
         }
 
         function getAudioAction(audio) {
@@ -244,12 +290,6 @@
                 </a>`;
             }
             return '<span class="text-slate-300 text-xs">No Audio</span>';
-        }
-
-        function updateStats(data) {
-            document.getElementById('totalCount').innerText = data.count || data.results.length;
-            const date = new Date(data.scraped_at);
-            document.getElementById('lastUpdated').innerText = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
         function showError(msg) {
@@ -265,4 +305,5 @@
         updateTableHeaders();
     </script>
 </body>
+
 </html>
