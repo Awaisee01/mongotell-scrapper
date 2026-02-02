@@ -39,11 +39,13 @@ class BotasaurusBrowser:
             self.driver = Driver(
                 headless=not settings.LOCAL_DEV,
                 arguments=[
-                    "--disable-dev-shm-usage", 
                     "--no-sandbox",
+                    "--disable-dev-shm-usage",
                     "--disable-gpu",
                     "--disable-software-rasterizer",
                     "--disable-extensions",
+                    "--headless=new",
+                    "--remote-debugging-port=9222",
                     "--window-size=1920,1080"
                 ] if not settings.LOCAL_DEV else []
             )
